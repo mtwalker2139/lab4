@@ -8,6 +8,8 @@ class colorTracking(object):
     def __init__(self, img_file):
         self.img = None
         self.list_of_clicks = []
+        self.crop = []
+        self.avg_color = []
         
         self._read_image(img_file)
     
@@ -31,7 +33,7 @@ class colorTracking(object):
         print ("please select color by clickign on the screen")
         cv2.imshow('image',img)
         cv2.waitKey(0)
-        cv2.destroyAllWindows
+        cv2.destroyAllWindows()
         #obtain the list of selected points
         print "The clicked points"
         print self.list_of_clicks
@@ -49,8 +51,27 @@ class colorTracking(object):
         x_range = x_max-x_min
         y_range = y_max-y_min
         
-        sqr = self.img[y_min:y_max, x_min:x_max]
-        #plt.imshow(sqr)
-        cv2.imshow('cropped',sqr)
+        self.crop = self.img[y_min:y_max, x_min:x_max]
+        cv2.imshow('cropped',self.crop)
+        cv2.waitKey(0)
+        
+        avg_color_per_row = np.average(self.crop,axis=0)
+        self.avg_color = np.average(avg_color_per_row,axis=0)
+        #hsv = cv2.cvtColor(self.crop, cv2.COLOR_BGR2HSV)
+        #avg_color_hsv = cv2.cvtColor(avg_color, cv2.COLOR_BGR2HSV)
+        print self.avg_color
+        #print avg_color_hsv
+        cv2.destroyAllWindows
+        
+    def create_mask(self):
+        avg_color = np.round(self.avg_color)
+        lower_bound = np.subtract(avg_color,[10,10,10])
+        upper_bound = np.add(avg_color,[10,10,10])
+        mask = cv2.inRange(self.img,lower_bound,upper_bound)
+        cv2.imshow('image',mask)
         cv2.waitKey(0)
         cv2.destroyAllWindows
+        
+        
+        
+        
